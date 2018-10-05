@@ -11,6 +11,7 @@ from numpy import genfromtxt,where,array
 from gnssQC import geodetics
 import json
 import argparse
+from os import remove
 
 
 ##############     parse the command line       ###############################
@@ -71,7 +72,7 @@ with open(json_file) as f:
         
         #print a status message
         if count % 80000 == 0:
-            print('... ... working on line '+count)
+            print('... ... working on line '+str(count))
         count+=1
         
         data=json.loads(line)
@@ -86,72 +87,83 @@ with open(json_file) as f:
         #convert from UNIX time to UTC
         t=UTCDateTime(t)
         
-        #Find reference ECEF coordinates and reference lat and lon, this index will
-        #also be used to find correct stream object to append tiny trace to
-        i=where(data['site'].lower()==stations)[0][0]
-        sta_lon=ref_lon[i]
-        sta_lat=ref_lat[i]
-        sta_x=ref_x[i]
-        sta_y=ref_y[i]
-        sta_z=ref_z[i]
-        
-        #Rotate from Earth Centered Earth Fixed to local NEU
-        n,e,u=geodetics.rotate2neu(x,y,z,sta_x,sta_y,sta_z,sta_lon,sta_lat)
-        
-        #create trace objects append to pertinent stream
-        ntr=Trace()
-        etr=Trace()
-        utr=Trace()
-        
-        ntr.data=array([n])
-        etr.data=array([e])
-        utr.data=array([u])
-        
-        #Add some metadata, time and statoin name and lon/lat
-        ntr.stats.starttime=t
-        ntr.stats.station=sta.lower()
-        ntr.stats.network=net
-        ntr.stats.channel='LXN'
-        ntr.stats.delta=1.0
-        
-        etr.stats.starttime=t
-        etr.stats.station=sta.lower()
-        etr.stats.network=net
-        etr.stats.channel='LXE'
-        ntr.stats.delta=1.0
-        
-        utr.stats.starttime=t
-        utr.stats.station=sta.lower()
-        utr.stats.network=net
-        utr.stats.channel='LXZ'
-        utr.stats.delta=1.0
-        
-        #use correct index to find the relevant stream object to append to
-        east_list[i]+=etr
-        north_list[i]+=ntr
-        up_list[i]+=utr
+        #if present sample is past the starttime
+        if t>=t0:
+
+            #Find reference ECEF coordinates and reference lat and lon, this index will
+            #also be used to find correct stream object to append tiny trace to
+            i=where(data['site'].lower()==stations)[0][0]
+            sta_lon=ref_lon[i]
+            sta_lat=ref_lat[i]
+            sta_x=ref_x[i]
+            sta_y=ref_y[i]
+            sta_z=ref_z[i]
+            
+            #Rotate from Earth Centered Earth Fixed to local NEU
+            n,e,u=geodetics.rotate2neu(x,y,z,sta_x,sta_y,sta_z,sta_lon,sta_lat)
+            
+            #create trace objects append to pertinent stream
+            ntr=Trace()
+            etr=Trace()
+            utr=Trace()
+            
+            ntr.data=array([n])
+            etr.data=array([e])
+            utr.data=array([u])
+            
+            #Add some metadata, time and statoin name and lon/lat
+            ntr.stats.starttime=t
+            ntr.stats.station=sta.lower()
+            ntr.stats.network=net
+            ntr.stats.channel='LXN'
+            ntr.stats.delta=1.0
+            
+            etr.stats.starttime=t
+            etr.stats.station=sta.lower()
+            etr.stats.network=net
+            etr.stats.channel='LXE'
+            etr.stats.delta=1.0
+            
+            utr.stats.starttime=t
+            utr.stats.station=sta.lower()
+            utr.stats.network=net
+            utr.stats.channel='LXZ'
+            utr.stats.delta=1.0
+            
+            #use correct index to find the relevant stream object to append to
+            east_list[i]+=etr
+            north_list[i]+=ntr
+            up_list[i]+=utr
         
 #now merge all the traces into one single big trace
 print('... starting conversion to MSEED')
 for k in range(len(east_list)):
-    print('... ... working on station '+east_list[k].stats.station)
-    east_list[k].merge(fill_value=9999)
-    north_list[k].merge(fill_value=9999)
-    up_list[k].merge(fill_value=9999)
     
-    #trim only to pertinent day
-    east_list[k].trim(starttime=t0,endtime=t0+86400)
-    north_list[k].trim(starttime=t0,endtime=t0+86400)
-    up_list[k].trim(starttime=t0,endtime=t0+86400)
+    print(east_list[k])
+    # was there any data available?
+    if len(east_list[k])>0:
     
-    #write to file
-    file_out=datapath+east_list[k].stats.station+'.LXE.mseed'
-    east_list[k].write(file_out,format='MSEED')
-    file_out=datapath+north_list[k].stats.station+'.LXN.mseed'
-    north_list[k].write(file_out,format='MSEED')
-    file_out=datapath+up_list[k].stats.station+'.LXZ.mseed'
-    up_list[k].write(file_out,format='MSEED')
+        print('... ... working on stream '+east_list[k][0].stats.station)
+        east_list[k].merge(fill_value=9999)
+        north_list[k].merge(fill_value=9999)
+        up_list[k].merge(fill_value=9999)
+        
+        #trim only to pertinent day
+        east_list[k].trim(starttime=t0,endtime=t0+86400)
+        north_list[k].trim(starttime=t0,endtime=t0+86400)
+        up_list[k].trim(starttime=t0,endtime=t0+86400)
+        
+        #write to file
+        file_out=datapath+east_list[k][0].stats.station+'.LXE.mseed'
+        east_list[k].write(file_out,format='MSEED')
+        file_out=datapath+north_list[k][0].stats.station+'.LXN.mseed'
+        north_list[k].write(file_out,format='MSEED')
+        file_out=datapath+up_list[k][0].stats.station+'.LXZ.mseed'
+        up_list[k].write(file_out,format='MSEED')
     
+#delete big huge json file when you are done
+remove(json_file)
+
 print('... done with conversion to MSEED of all files')
     
     

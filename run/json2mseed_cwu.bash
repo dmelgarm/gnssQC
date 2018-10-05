@@ -47,6 +47,10 @@ fi
 #define daily directory where json data should be found
 working_dir=$home$year/$current_day/
 
+#log files
+error_file=${working_dir}_err_json2mseed.log
+status_file=${working_dir}_status_json2mseed.log
 
 #Run the conversion script redirect output to a log file
-python /home/dmelgarm/code/gnssQC/json2seed.py --sitelist $sitelist --datapath $working_dir --net $net --starttime $start_time
+python /home/dmelgarm/code/gnssQC/json2seed.py --sitelist $sitelist --datapath $working_dir --net $net --starttime $start_time > $status_file 2> $error_file &
+
