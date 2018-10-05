@@ -8,7 +8,7 @@
 #and inits the rabbitMQ subscription script. This script should run at 11pm UTC
 #of the day BEFORE so that you catch one hours worth of data before the start
 #of the day of interest. The excess data will be cleaned up later in another
-#python script that converts the json to MSEED
+#python script that converts the json to MSEED. Run this script using a cron.
 
 #where is the subscription script
 path_to_code=/home/dmelgarm/code/PANGA/script/
