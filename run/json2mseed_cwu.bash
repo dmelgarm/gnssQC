@@ -6,6 +6,19 @@
 #turn use obspy commands to conver the json for every station and every channel to 
 #one big daily MSEED file
 
+#Add to PYTHONPATH
+export PYTHONPATH=/home/dmelgarm/code/anaconda3/bin
+export PYTHONPATH=/home/dmelgarm/code/anaconda3/lib/python3.6/site-packages/
+export PYTHONPATH=/home/dmelgarm/code
+export PYTHONPATH=/home/dmelgarm/code/PANGA/lib
+export PYTHONPATH=/home/dmelgarm/code/MudPy/src/python
+export PYTHONPATH=/home/dmelgarm/code/clawpack-5.4.1
+export PYTHONPATH=/home/dmelgarm/RTGNSS/cwu/mseed/2018/278
+export PYTHONPATH=/home/dmelgarm/code/anaconda3/lib/python36.zip
+export PYTHONPATH=/home/dmelgarm/code/anaconda3/lib/python3.6
+export PYTHONPATH=/home/dmelgarm/code/anaconda3/lib/python3.6/lib-dynload
+export PYTHONPATH=/home/dmelgarm/code/anaconda3/lib/python3.6/site-packages
+export PYTHONPATH=/home/dmelgarm/code/anaconda3/lib/python3.6/site-packages/IPython/extensions
 
 #Define site list of stations to be processed
 sitelist=/home/dmelgarm/code/PANGA/site_list/readi_sitelist.txt
@@ -52,5 +65,5 @@ error_file=${working_dir}_err_json2mseed.log
 status_file=${working_dir}_status_json2mseed.log
 
 #Run the conversion script redirect output to a log file
-python /home/dmelgarm/code/gnssQC/json2seed.py --sitelist $sitelist --datapath $working_dir --net $net --starttime $start_time > $status_file 2> $error_file &
+/home/dmelgarm/code/anaconda3/bin/python /home/dmelgarm/code/gnssQC/json2seed.py --sitelist $sitelist --datapath $working_dir --net $net --starttime $start_time > $status_file 2> $error_file &
 

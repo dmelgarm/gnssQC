@@ -5,6 +5,9 @@ Created on Mon Oct  1 14:14:42 2018
 
 @author: dmelgarm
 """
+import sys
+sys.path.append('/home/dmelgarm/code/anaconda3/lib/python3.6/site-packages/')
+sys.path.append('/home/dmelgarm/code/')
 
 from obspy import Stream,Trace,UTCDateTime
 from numpy import genfromtxt,where,array
@@ -12,7 +15,7 @@ from gnssQC import geodetics
 import json
 import argparse
 from os import remove
-
+from datetime import timedelta
 
 ##############     parse the command line       ###############################
 
@@ -30,7 +33,7 @@ net=args.net
 if args.starttime == None:
     t0=None
 else:
-    t0=UTCDateTime(args.starttime)
+    t0=UTCDateTime(args.starttime)-timedelta(days=1)
 print(sitelist)
 print(datapath)
 print(net)
