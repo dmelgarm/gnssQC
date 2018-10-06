@@ -142,7 +142,6 @@ with open(json_file) as f:
 print('... starting conversion to MSEED')
 for k in range(len(east_list)):
     
-    print(east_list[k])
     # was there any data available?
     if len(east_list[k])>0:
     
