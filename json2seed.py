@@ -5,6 +5,9 @@ Created on Mon Oct  1 14:14:42 2018
 
 @author: dmelgarm
 """
+
+#Because we're running from a cron with limited path access, need to manually add
+#relevant directories
 import sys
 sys.path.append('/home/dmelgarm/code/anaconda3/lib/python3.6/site-packages/')
 sys.path.append('/home/dmelgarm/code/')
@@ -164,7 +167,7 @@ for k in range(len(east_list)):
         up_list[k].write(file_out,format='MSEED')
     
 #delete big huge json file when you are done
-remove(json_file)
+#remove(json_file)
 
 print('... done with conversion to MSEED of all files')
     

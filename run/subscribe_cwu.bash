@@ -42,7 +42,7 @@ status_file=${working_dir}_status.log
 utc_date=`date -u`
 echo Started RabbitMQ subscription on $utc_date > $status_file
 
-#run subscription command, use timeout to kill the subscription after 26 hrs
+#run subscription command, use timeout to kill the subscription after 24 and 20 minutes
 # this gives you 1hr before start of day and one hour after
-timeout 26h ${path_to_code}subscribe.py --rabbitmq-configuration $config_file --sitelist $sitelist > $json_file 2> $error_file &
+timeout 1460m ${path_to_code}subscribe.py --rabbitmq-configuration $config_file --sitelist $sitelist > $json_file 2> $error_file &
 
