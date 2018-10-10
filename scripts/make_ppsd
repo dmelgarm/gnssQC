@@ -1,0 +1,149 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Oct 10 08:41:31 2018
+
+@author: dmelgarm
+"""
+
+from obspy import read
+import obspy
+from obspy.signal import PPSD
+from numpy import where,mean
+from glob import glob
+from matplotlib import pyplot as plt
+
+
+station='farb'
+
+folders=glob('/home/dmelgarm/RTGNSS/cwu/mseed/2018/*')
+
+#spoof instrument response
+paz = {'gain': 1,'poles': [1],'sensitivity': 1,'zeros': [0j, 0j]}
+
+k=0
+    
+for kday in range(len(folders)):
+    
+    #Avoid folders with no data
+    if folders[kday]=='/home/dmelgarm/RTGNSS/cwu/mseed/2018/283':
+        pass
+    
+    else:
+
+        try:
+            e=read(folders[kday]+'/'+station+'.LXE.mseed')
+            n=read(folders[kday]+'/'+station+'.LXN.mseed')
+            z=read(folders[kday]+'/'+station+'.LXZ.mseed')
+            
+            #mask out drops
+            idrop=where(e[0].data==9999)[0]
+            inodrop=where(e[0].data!=9999)[0]
+            
+            #get mean of data with no drops
+            e[0].data=e[0].data-mean(e[0].data[inodrop])
+            n[0].data=n[0].data-mean(n[0].data[inodrop])
+            z[0].data=z[0].data-mean(z[0].data[inodrop])
+            
+            #zero out the drops
+            e[0].data[idrop]=0
+            n[0].data[idrop]=0
+            z[0].data[idrop]=0
+            
+            #If first time data has been seen create ppsd object
+            if k==0:
+                Eppsd = PPSD(e[0].stats, paz, db_bins=(-70, 10, 1.0),period_limits=[2,600], special_handling="ringlaser")
+                Nppsd = PPSD(n[0].stats, paz, db_bins=(-70, 10, 1.0),period_limits=[2,600], special_handling="ringlaser")
+                Zppsd = PPSD(z[0].stats, paz, db_bins=(-70, 10, 1.0),period_limits=[2,600], special_handling="ringlaser")
+                
+            #Add traces to ppsd object
+            Eppsd.add(e) 
+            Nppsd.add(n) 
+            Zppsd.add(z) 
+            
+            #Done
+            k+=1
+                
+        except:
+
+            pass
+
+
+
+#Make plot and save
+plt.close("all")
+
+#Make ppsd
+Eppsd.plot(period_lim=(2, 600),cmap=obspy.imaging.cm.pqlx)
+ax=plt.figure(1).axes[0]
+plt.sca(ax)
+
+#Set reference lines
+plt.plot([2,600],[-11,-11],'k')
+plt.plot([2,600],[-17,-17],'k')
+plt.plot([2,600],[-23,-23],'k')
+plt.plot([2,600],[-37,-37],'k')
+plt.plot([2,600],[-57,-57],'k')
+
+bbox = dict(boxstyle="round", fc="0.8")
+ax.annotate('20cm',xy=(2.3,-11),bbox=bbox)
+ax.annotate('10cm',xy=(2.3,-18),bbox=bbox)
+ax.annotate('5cm',xy=(2.3,-25),bbox=bbox)
+ax.annotate('1cm',xy=(2.3,-38),bbox=bbox)
+ax.annotate('0.1cm',xy=(2.3,-58),bbox=bbox)
+
+plt.savefig('/home/dmelgarm/RTGNSS/plots/'+station+'.LXE.ppsd.png')
+
+
+
+
+plt.close("all")
+
+#Make ppsd
+Nppsd.plot(period_lim=(2, 600),cmap=obspy.imaging.cm.pqlx)
+ax=plt.figure(1).axes[0]
+plt.sca(ax)
+
+#Set reference lines
+plt.plot([2,600],[-11,-11],'k')
+plt.plot([2,600],[-17,-17],'k')
+plt.plot([2,600],[-23,-23],'k')
+plt.plot([2,600],[-37,-37],'k')
+plt.plot([2,600],[-57,-57],'k')
+
+bbox = dict(boxstyle="round", fc="0.8")
+ax.annotate('20cm',xy=(2.3,-11),bbox=bbox)
+ax.annotate('10cm',xy=(2.3,-18),bbox=bbox)
+ax.annotate('5cm',xy=(2.3,-25),bbox=bbox)
+ax.annotate('1cm',xy=(2.3,-38),bbox=bbox)
+ax.annotate('0.1cm',xy=(2.3,-58),bbox=bbox)
+
+plt.savefig('/home/dmelgarm/RTGNSS/plots/'+station+'.LXN.ppsd.png')
+
+
+
+
+
+
+plt.close("all")
+
+#Make ppsd
+Zppsd.plot(period_lim=(2, 600),cmap=obspy.imaging.cm.pqlx)
+ax=plt.figure(1).axes[0]
+plt.sca(ax)
+
+#Set reference lines
+plt.plot([2,600],[-11,-11],'k')
+plt.plot([2,600],[-17,-17],'k')
+plt.plot([2,600],[-23,-23],'k')
+plt.plot([2,600],[-37,-37],'k')
+plt.plot([2,600],[-57,-57],'k')
+
+bbox = dict(boxstyle="round", fc="0.8")
+ax.annotate('20cm',xy=(2.3,-11),bbox=bbox)
+ax.annotate('10cm',xy=(2.3,-18),bbox=bbox)
+ax.annotate('5cm',xy=(2.3,-25),bbox=bbox)
+ax.annotate('1cm',xy=(2.3,-38),bbox=bbox)
+ax.annotate('0.1cm',xy=(2.3,-58),bbox=bbox)
+
+plt.savefig('/home/dmelgarm/RTGNSS/plots/'+station+'.LXZ.ppsd.png')
