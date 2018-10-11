@@ -6,25 +6,7 @@ Created on Mon Oct  8 14:23:07 2018
 @author: dmelgarm
 """
 
-#Because we're running from a cron with limited path access, need to manually add
-#relevant directories
-import sys
-sys.path.append('/home/dmelgarm/code/anaconda3/lib/python3.6/site-packages/')
-sys.path.append('/home/dmelgarm/code/')
 
-#other functions
-from numpy import genfromtxt
-
-
-
-
-
-net='CW'
-site_list='/home/dmelgarm/code/PANGA/site_list/readi_sitelist.txt'
-working_dir='/home/dmelgarm/RTGNSS/cwu/mseed/2018/282/'
-
-#read stations
-stations=genfromtxt(site_list,usecols=0,dtype='U')
 
 
 
@@ -93,13 +75,15 @@ def ppsd(mseed_file,drop_value=9999):
     #add to ppsd
     ppsd.add(st)
 
-def get_dropouts(site_list,working_dir,net):
+
+
+def get_dropouts(stations,working_dir,net):
     '''
     loop over all sites get drops, put in an mseed file
     
     '''
 
-    from obspy import Stream,Trace,read
+    from obspy import Stream,Trace
     
     #Summary file
     f=open(working_dir+'_drops.summary','w')
