@@ -25,6 +25,7 @@ sitelist=/home/dmelgarm/code/PANGA/site_list/readi_sitelist.txt
 
 #Whose data am I looking at
 net='CW'
+exchange='CWU'
 
 #where am I working?
 home=/home/dmelgarm/RTGNSS/cwu/mseed/
@@ -63,7 +64,23 @@ working_dir=$home$year/$current_day/
 #log files
 error_file=${working_dir}_err_json2mseed.log
 status_file=${working_dir}_status_json2mseed.log
+error_file_drops=${working_dir}_err_drops.log
+status_file_drops=${working_dir}_status_drops.log
+
+
+
 
 #Run the conversion script redirect output to a log file
 /home/dmelgarm/code/anaconda3/bin/python /home/dmelgarm/code/gnssQC/json2seed.py --sitelist $sitelist --datapath $working_dir --net $net --starttime $start_time > $status_file 2> $error_file &
+
+
+
+
+
+#After you are finished run the dropouts analysis
+
+#re-define working dir, don;t need to specify the day
+working_dir=$home$year/
+
+/home/dmelgarm/code/anaconda3/bin/python /home/dmelgarm/code/gnssQC/scripts/run_dropouts_analysis.py --sitelist $sitelist --working_dir $working_dir --net $net --exchange $exchange --doy_start $current_day > $status_file_drops 2> $error_file_drops &
 

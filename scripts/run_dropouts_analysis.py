@@ -6,26 +6,59 @@ Created on Wed Oct 10 14:34:16 2018
 @author: dmelgarm
 """
 
+#Because we're running from a cron with limited path access, need to manually add
+#relevant directories
+import sys
+sys.path.append('/home/dmelgarm/code/anaconda3/lib/python3.6/site-packages/')
+sys.path.append('/home/dmelgarm/code/')
+
+#Set up a backend that does not show plot to user
+import matplotlib
+matplotlib.use('Agg')
+
+#Now the other modules
 from gnssQC import analysis
-from glob import glob
 from numpy import genfromtxt,where,zeros,arange,r_,array,expand_dims,c_,nan
 from matplotlib import pyplot as plt
 from obspy import read
+import argparse
+from os.path import exists
 
 
 
-net='CW'
-exchange='CWU'
-site_list='/home/dmelgarm/code/PANGA/site_list/readi_sitelist.txt'
-days=arange(277,283)
-working_dir='/home/dmelgarm/RTGNSS/cwu/mseed/'
+
+##############     parse the command line       ###############################
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--net", help="CW, SI, JP, or RK")
+parser.add_argument("--exchange", help="CWU, SIO, JPL or READI")
+parser.add_argument("--doy_start", help="First day of year")
+parser.add_argument("--working_dir", help="Path to mseed folders")
+parser.add_argument("--sitelist", help="Path to station sitelist")
+args = parser.parse_args()
+
+#assign argumens to variables
+delta_day=5
+net=args.net
+exchange=args.exchange
+site_list=args.sitelist
+working_dir=args.working_dir
+days=arange(int(args.doy_start),int(args.doy_start)+5)-delta_day+1
+
+print(net)
+print(exchange)
+print(site_list)
+print(working_dir)
+print(days)
+##############       done parsing       #######################################
+
+
 
 ################        What do you want to do?    ############################
-find_dropouts=False
-plot_dropouts_table=False
+
+find_dropouts=True
+plot_dropouts_table=True
 plot_histogram_time_of_day=True
-
-
 
 #################     done with pre-amble stuff    ############################
 
@@ -33,7 +66,14 @@ plot_histogram_time_of_day=True
 
 
 #folders with data
-folders=glob(working_dir+'2018/*')
+folders=[]
+for k in range(delta_day):
+    day_folder=working_dir+str(days[k])
+    if exists(day_folder)==True:
+        folders.append(day_folder)
+    else:
+        print('... folder %s has no data' % (day_folder))
+print(folders)
 
 #read stations
 stations=genfromtxt(site_list,usecols=0,dtype='U')

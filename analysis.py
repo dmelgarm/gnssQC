@@ -94,7 +94,6 @@ def get_dropouts(stations,working_dir,net):
         station_file=working_dir+stations[k]+'.LXE.mseed'
         
         try:
-            print('... getting dropputs for'+station_file)
             t0,drops,Nsamples=dropouts(station_file)
             st=Stream(Trace())
             st[0].data=drops
