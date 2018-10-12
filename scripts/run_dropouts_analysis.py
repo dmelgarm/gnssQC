@@ -57,9 +57,9 @@ print(days)
 
 ################        What do you want to do?    ############################
 
-find_dropouts=False
+find_dropouts=True
 plot_dropouts_table=True
-plot_histogram_time_of_day=False
+plot_histogram_time_of_day=True
 
 #################     done with pre-amble stuff    ############################
 
@@ -93,8 +93,8 @@ if find_dropouts:
         
 # from _drops.summary for all days plot a table
 if plot_dropouts_table:
-    vmin=50
-    vmax=100
+    vmin=70
+    vmax=150
     
     #output
     Nreceived=zeros(len(stations))
@@ -136,7 +136,7 @@ if plot_dropouts_table:
         if kax<4:
             U=c_[uptime[i],uptime[i],uptime[i]]
             S=stations[i]
-            im = ax.imshow(U,cmap='brg',vmin=vmin,vmax=vmax)
+            im = ax.imshow(U,cmap='gist_rainbow',vmin=vmin,vmax=vmax)
         else:
             i=arange(40*kax,len(stations))
             U=zeros(Nslice)*nan
@@ -145,7 +145,7 @@ if plot_dropouts_table:
             S=stations[i]
             for kfix in arange(Nslice-len(i)):
                 S=r_[S,array([''])]
-            im = ax.imshow(U,cmap='brg',vmin=vmin,vmax=vmax)
+            im = ax.imshow(U,cmap='gist_rainbow',vmin=vmin,vmax=vmax)
             
             
         

@@ -196,7 +196,7 @@ for k in range(len(east_list)):
         up_list[k].write(file_out,format='MSEED')
     
 #delete big huge json file when you are done
-remove(json_file)
+#remove(json_file)
 
 print('... done with conversion to MSEED of all files')
     
