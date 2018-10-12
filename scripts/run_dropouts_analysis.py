@@ -56,9 +56,9 @@ print(days)
 
 ################        What do you want to do?    ############################
 
-find_dropouts=True
+find_dropouts=False
 plot_dropouts_table=True
-plot_histogram_time_of_day=True
+plot_histogram_time_of_day=False
 
 #################     done with pre-amble stuff    ############################
 
@@ -105,7 +105,7 @@ if plot_dropouts_table:
         site=stations[ksta]
         print('Working on '+stations[ksta])
         
-        for kday in range(len(days)):
+        for kday in range(len(folders)):
             
             station_drops=genfromtxt(folders[kday]+'/_drops.summary',usecols=0,dtype='U')
             

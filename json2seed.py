@@ -33,6 +33,9 @@ args = parser.parse_args()
 sitelist=args.sitelist
 datapath=args.datapath
 net=args.net
+#Make sure it's upper case
+net=net.upper()
+
 if args.starttime == None:
     t0=None
 else:
@@ -80,33 +83,59 @@ with open(json_file) as f:
         if count % 80000 == 0:
             print('... ... working on line '+str(count))
         count+=1
-        
-        data=json.loads(line)
-        
-        #parse data
-        sta=data['site']
-        x=data['x']
-        y=data['y']
-        z=data['z']
-        t=data['t']
-        
+
+
+        #Different rules for parsin READI vs CWU/JPL/SIO
+        if net=='RK':
+            #Readi records come with some weird white space, get rid of it
+            data=json.loads(line.rstrip('\n').rstrip('\x00'))
+            
+            #Get SNCL and from that get the station code, make it lower case
+            sta=data['properties']['SNCL'].split('.')[0].lower()
+            
+            #get coordinates, already N,E,U
+            n,e,u=data['features'][0]['geometry']['coordinates']
+            
+            #Get UNIX time, it comes in milliseconds, convert to seconds
+            t=data['properties']['time']/1000
+    
+        #Now for CWU, JPL, SIO    
+        else:
+            data=json.loads(line)
+            
+            #parse data
+            sta=data['site']
+            x=data['x']
+            y=data['y']
+            z=data['z']
+            t=data['t']
+            
+            
         #convert from UNIX time to UTC
         t=UTCDateTime(t)
         
         #if present sample is past the starttime
         if t>=t0:
 
-            #Find reference ECEF coordinates and reference lat and lon, this index will
-            #also be used to find correct stream object to append tiny trace to
-            i=where(data['site'].lower()==stations)[0][0]
+            #get station lon/lat from apriori list
+            i=where(stations==sta)[0][0]
             sta_lon=ref_lon[i]
             sta_lat=ref_lat[i]
-            sta_x=ref_x[i]
-            sta_y=ref_y[i]
-            sta_z=ref_z[i]
             
-            #Rotate from Earth Centered Earth Fixed to local NEU
-            n,e,u=geodetics.rotate2neu(x,y,z,sta_x,sta_y,sta_z,sta_lon,sta_lat)
+            #Now rotate coordinates
+            if net=='RK':
+                #Do nothing data is good to go
+                pass
+            
+            else:
+                #Find reference ECEF coordinates and reference lat and lon, this index will
+                #also be used to find correct stream object to append tiny trace to
+                sta_x=ref_x[i]
+                sta_y=ref_y[i]
+                sta_z=ref_z[i]
+                
+                #Rotate from Earth Centered Earth Fixed to local NEU
+                n,e,u=geodetics.rotate2neu(x,y,z,sta_x,sta_y,sta_z,sta_lon,sta_lat)
             
             #create trace objects append to pertinent stream
             ntr=Trace()
@@ -167,7 +196,7 @@ for k in range(len(east_list)):
         up_list[k].write(file_out,format='MSEED')
     
 #delete big huge json file when you are done
-#remove(json_file)
+remove(json_file)
 
 print('... done with conversion to MSEED of all files')
     

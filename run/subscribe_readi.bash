@@ -14,11 +14,11 @@
 path_to_code=/home/dmelgarm/code/PANGA/script/
 
 #config file and sitelist
-config_file=/home/dmelgarm/code/PANGA/conf/rmq-x-sio-xyzcov.cfg
+config_file=/home/dmelgarm/code/PANGA/conf/rmq-x-readi-twc.cfg
 sitelist=/home/dmelgarm/code/PANGA/site_list/readi_sitelist.txt
 
 #where am I working?
-home=/home/dmelgarm/RTGNSS/sio/mseed/
+home=/home/dmelgarm/RTGNSS/readi/mseed/
 
 #What year is it
 year=`date +"%Y"`
@@ -44,5 +44,5 @@ echo Started RabbitMQ subscription on $utc_date > $status_file
 
 #run subscription command, use timeout to kill the subscription after 24 and 20 minutes
 # this gives you 1hr before start of day and one hour after
-timeout 1430m ${path_to_code}subscribe.py --rabbitmq-configuration $config_file --sitelist $sitelist > $json_file 2> $error_file &
+timeout 1460m ${path_to_code}subscribe.py --rabbitmq-configuration $config_file --sitelist $sitelist > $json_file 2> $error_file &
 

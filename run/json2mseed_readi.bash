@@ -24,8 +24,8 @@ export PYTHONPATH=/home/dmelgarm/code/anaconda3/lib/python3.6/site-packages/IPyt
 sitelist=/home/dmelgarm/code/PANGA/site_list/readi_sitelist.txt
 
 #Whose data am I looking at
-net='SI'
-exchange='SIO'
+net='RK'
+exchange='READI'
 
 #where am I working?
 home=/home/dmelgarm/RTGNSS/sio/mseed/
@@ -69,9 +69,11 @@ status_file=${working_dir}_status_json2mseed.log
 /home/dmelgarm/code/anaconda3/bin/python /home/dmelgarm/code/gnssQC/json2seed.py --sitelist $sitelist --datapath $working_dir --net $net --starttime $start_time > $status_file 2> $error_file &
 
 
+
 #After you are finished run the dropouts analysis
 
 #re-define working dir, don;t need to specify the day
 working_dir=$home$year/
 
 /home/dmelgarm/code/anaconda3/bin/python /home/dmelgarm/code/gnssQC/scripts/run_dropouts_analysis.py --sitelist $sitelist --working_dir $working_dir --net $net --exchange $exchange --doy_start $current_day > $status_file_drops 2> $error_file_drops &
+
