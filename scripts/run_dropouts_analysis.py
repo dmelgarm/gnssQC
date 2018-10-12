@@ -50,6 +50,7 @@ print(exchange)
 print(site_list)
 print(working_dir)
 print(days)
+
 ##############       done parsing       #######################################
 
 
