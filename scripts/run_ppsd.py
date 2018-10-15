@@ -14,7 +14,7 @@ sys.path.append('/home/dmelgarm/code/')
 
 #Set up a backend that does not show plot to user
 import matplotlib
-#matplotlib.use('Agg')
+matplotlib.use('Agg')
 
 #Now the other modules
 from gnssQC import analysis
@@ -22,6 +22,7 @@ from numpy import genfromtxt,where,zeros,arange,r_,array,expand_dims,c_,nan
 from matplotlib import pyplot as plt
 from obspy import read
 from obspy.signal import PPSD
+from obspy.imaging.cm import pqlx
 import argparse
 from os.path import exists
 from glob import glob
@@ -59,10 +60,11 @@ from glob import glob
 
 ###########     manual argument inputs for debugging     #######################
 site_list='/home/dmelgarm/code/PANGA/site_list/readi_sitelist.txt'
-mseed_dir='/home/dmelgarm/RTGNSS/cwu/mseed/2018/'
-ppsd_dir='/home/dmelgarm/RTGNSS/cwu/analysis/spectra/'
-net='CW'
-exchange='CWU'
+mseed_dir='/home/dmelgarm/RTGNSS/readi/mseed/2018'
+ppsd_dir='/home/dmelgarm/RTGNSS/readi/analysis/spectra/'
+plot_dir='/home/dmelgarm/RTGNSS/plots/ppsd/'
+net='RK'
+exchange='READI'
 day_of_year=285
 ###############################################################################
 
@@ -70,16 +72,11 @@ day_of_year=285
 
 ################        What do you want to do?    ############################
 
-run_ppsd=True
+run_ppsd=False
 plot_ppsd=True
 
 #################     done with pre-amble stuff    ############################
 
-
-
-#Find the folders with data
-folders=glob(mseed_dir+'*')
-print(folders)
 
 #read stations
 stations=genfromtxt(site_list,usecols=0,dtype='U')
@@ -99,7 +96,7 @@ if run_ppsd:
     stations=genfromtxt(site_list,usecols=0,dtype='U')
     
     #get available data folders
-    folders=glob(mseed_dir+'/')
+    folders=glob(mseed_dir+'/*/')
     
     #loop over sites
     for ksta in range(len(stations)):
@@ -107,18 +104,17 @@ if run_ppsd:
         # get current station
         site=stations[ksta]
         
-        print('Working on station '+site)
-        
         #This guy keeps track of whether we've checked for ppsd initalization
         #for a particular station
         ppsd_init=False
+        
+        #This guy tracks whether any new ppsd data was found
+        updated_ppsd=False
         
         #Keep track of whether we ever found any data whatsoever for a particular site
         data_found=False
         
         for kday in range(len(folders)):
-           
-            print(folders[kday])
             
             #Where are the data
             efile=folders[kday]+'/'+site+'.LXE.mseed'
@@ -166,7 +162,8 @@ if run_ppsd:
                 #object, if it is not, tne add the trace, otherwise skip
                 if Eppsd._PPSD__check_time_present(e[0].stats.starttime) == False:
                     
-                    print(e[0].stats.starttime)
+                    #Did you find some new data?
+                    updated_ppsd=True
                     
                     #process the traces to zero out gaps
                     e=analysis.prepare_for_ppsd(e)
@@ -178,7 +175,111 @@ if run_ppsd:
                     Zppsd.add(z)
                     
         #Done with that site, save the god danged ppsd
-        if data_found:
+        if updated_ppsd==True:
+            print('Updating PPSd for station '+site)
             Eppsd.save_npz(Eppsd_file)
             Nppsd.save_npz(Nppsd_file)
             Zppsd.save_npz(Zppsd_file)
+        else:
+            print('PPSD for station '+site+' was unchanged')
+            
+            
+            
+# Now plot each one           
+if plot_ppsd:
+    
+    #Reset any stray figures
+    plt.close("all")
+    
+    #get station information
+    stations=genfromtxt(site_list,usecols=0,dtype='U')
+    
+    for ksta in range(len(stations)):
+        
+        print('Creating plot for station '+site)
+        
+        #Current station
+        site=stations[ksta]
+    
+        Eppsd_file=ppsd_dir+site+'.LXE.ppsd.npz'
+        Nppsd_file=ppsd_dir+site+'.LXN.ppsd.npz'
+        Zppsd_file=ppsd_dir+site+'.LXZ.ppsd.npz'
+    
+        #Does the ppsd object exist?
+        if exists(Eppsd_file)==True:
+            
+            #Load the previously saved PPSDs
+            Eppsd = PPSD.load_npz(Eppsd_file,metadata=paz)
+            Nppsd = PPSD.load_npz(Nppsd_file,metadata=paz)
+            Zppsd = PPSD.load_npz(Zppsd_file,metadata=paz)
+            
+            #Make ppsd plots, one per channel
+            Eppsd.plot(period_lim=(2, 600),cmap=pqlx)
+            ax=plt.figure(1).axes[0]
+            plt.sca(ax)
+            
+            #Set reference lines
+            plt.plot([2,600],[-11,-11],'k')
+            plt.plot([2,600],[-17,-17],'k')
+            plt.plot([2,600],[-23,-23],'k')
+            plt.plot([2,600],[-37,-37],'k')
+            plt.plot([2,600],[-57,-57],'k')
+            
+            bbox = dict(boxstyle="round", fc="0.8")
+            ax.annotate('20cm',xy=(2.3,-11),bbox=bbox)
+            ax.annotate('10cm',xy=(2.3,-18),bbox=bbox)
+            ax.annotate('5cm',xy=(2.3,-25),bbox=bbox)
+            ax.annotate('1cm',xy=(2.3,-38),bbox=bbox)
+            ax.annotate('0.1cm',xy=(2.3,-58),bbox=bbox)
+            
+            plt.savefig(plot_dir+net+'.'+site+'.LXE.ppsd.png')
+            plt.close()
+            
+            
+            
+            #NORTH
+            
+            Nppsd.plot(period_lim=(2, 600),cmap=pqlx)
+            ax=plt.figure(1).axes[0]
+            plt.sca(ax)
+            
+            #Set reference lines
+            plt.plot([2,600],[-11,-11],'k')
+            plt.plot([2,600],[-17,-17],'k')
+            plt.plot([2,600],[-23,-23],'k')
+            plt.plot([2,600],[-37,-37],'k')
+            plt.plot([2,600],[-57,-57],'k')
+            
+            bbox = dict(boxstyle="round", fc="0.8")
+            ax.annotate('20cm',xy=(2.3,-11),bbox=bbox)
+            ax.annotate('10cm',xy=(2.3,-18),bbox=bbox)
+            ax.annotate('5cm',xy=(2.3,-25),bbox=bbox)
+            ax.annotate('1cm',xy=(2.3,-38),bbox=bbox)
+            ax.annotate('0.1cm',xy=(2.3,-58),bbox=bbox)
+            
+            plt.savefig(plot_dir+net+'.'+site+'.LXN.ppsd.png')
+            plt.close()
+            
+            
+            #VERTICAL
+            
+            Zppsd.plot(period_lim=(2, 600),cmap=pqlx)
+            ax=plt.figure(1).axes[0]
+            plt.sca(ax)
+            
+            #Set reference lines
+            plt.plot([2,600],[-11,-11],'k')
+            plt.plot([2,600],[-17,-17],'k')
+            plt.plot([2,600],[-23,-23],'k')
+            plt.plot([2,600],[-37,-37],'k')
+            plt.plot([2,600],[-57,-57],'k')
+            
+            bbox = dict(boxstyle="round", fc="0.8")
+            ax.annotate('20cm',xy=(2.3,-11),bbox=bbox)
+            ax.annotate('10cm',xy=(2.3,-18),bbox=bbox)
+            ax.annotate('5cm',xy=(2.3,-25),bbox=bbox)
+            ax.annotate('1cm',xy=(2.3,-38),bbox=bbox)
+            ax.annotate('0.1cm',xy=(2.3,-58),bbox=bbox)
+            
+            plt.savefig(plot_dir+net+'.'+site+'.LXZ.ppsd.png')
+            plt.close()
