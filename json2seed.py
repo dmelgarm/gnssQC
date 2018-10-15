@@ -93,7 +93,7 @@ with open(json_file) as f:
         count+=1
 
 
-        #Different rules for parsin READI vs CWU/JPL/SIO
+        #Different rules for parsing READI vs CWU/JPL/SIO
         if net=='RK':
             #Readi records come with some weird white space, get rid of it
             data=json.loads(line.rstrip('\n').rstrip('\x00'))
@@ -101,7 +101,7 @@ with open(json_file) as f:
             #Get SNCL and from that get the station code, make it lower case
             sta=data['properties']['SNCL'].split('.')[0].lower()
             
-            #get coordinates, already N,E,U
+            #get coordinates, these are already N,E,U
             n,e,u=data['features'][0]['geometry']['coordinates']
             
             #Get UNIX time, it comes in milliseconds, convert to seconds
@@ -123,7 +123,7 @@ with open(json_file) as f:
             #rest of the calculation is skipped, it will simply later appear as a gap
             # Note, i've only seen this one or two epochs over several days
             except:
-                print('JSON read error, skipping line')
+                print('*** JSON read error, skipping line')
                 t='1900-01-01T00:00:00'
                 sta='xxxx'
             
