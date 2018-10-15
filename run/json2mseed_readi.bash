@@ -1,9 +1,9 @@
 #!/bin/bash
 
-#This script should run at 1:30am of the day AFTER the day of interest whose data 
+#This script should run at 1:30am of the day AFTER the day of interest whose data
 #was collected from the RabbitMQ exchange by the subscription script. It will obtain
 #the necessary arguemnts and pass them into json2mseed.py, this python script will in
-#turn use obspy commands to conver the json for every station and every channel to 
+#turn use obspy commands to conver the json for every station and every channel to
 #one big daily MSEED file
 
 #Add to PYTHONPATH
@@ -28,7 +28,7 @@ net='RK'
 exchange='READI'
 
 #where am I working?
-home=/home/dmelgarm/RTGNSS/sio/mseed/
+home=/home/dmelgarm/RTGNSS/readi/mseed/
 
 #What year/month/day is it
 year=`date +"%Y"`
@@ -76,4 +76,3 @@ status_file=${working_dir}_status_json2mseed.log
 working_dir=$home$year/
 
 /home/dmelgarm/code/anaconda3/bin/python /home/dmelgarm/code/gnssQC/scripts/run_dropouts_analysis.py --sitelist $sitelist --working_dir $working_dir --net $net --exchange $exchange --doy_start $current_day > $status_file_drops 2> $error_file_drops &
-

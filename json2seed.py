@@ -48,6 +48,14 @@ print(t0)
 
 
 
+###########     manual argument inputs for debugging     #######################
+#sitelist='/home/dmelgarm/code/PANGA/site_list/readi_sitelist.txt'
+#datapath='/home/dmelgarm/RTGNSS/cwu/mseed/2018/285/'
+#net='CW'
+#t0=UTCDateTime('2018-10-12T00:00:00.000000Z')
+###############################################################################
+
+
 
 #define json file to be read
 json_file=datapath+'_json'
@@ -101,15 +109,26 @@ with open(json_file) as f:
     
         #Now for CWU, JPL, SIO    
         else:
-            data=json.loads(line)
+            try:
+                data=json.loads(line)
+                
+                #parse data
+                sta=data['site']
+                x=data['x']
+                y=data['y']
+                z=data['z']
+                t=data['t']
             
-            #parse data
-            sta=data['site']
-            x=data['x']
-            y=data['y']
-            z=data['z']
-            t=data['t']
+            #If there's a json read error make time be outrageously early so the
+            #rest of the calculation is skipped, it will simply later appear as a gap
+            # Note, i've only seen this one or two epochs over several days
+            except:
+                print('JSON read error, skipping line')
+                t='1900-01-01T00:00:00'
+                sta='xxxx'
             
+        #Make sure everything is the correct case
+        sta=sta.lower()
             
         #convert from UNIX time to UTC
         t=UTCDateTime(t)

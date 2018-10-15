@@ -42,7 +42,29 @@ def dropouts(mseed_file,drop_value=9999):
 
 
 
-def ppsd(mseed_file,drop_value=9999):
+def prepare_for_ppsd(st,drop_value=9999):
+    '''
+    Prepare trace for inclusion into the PPSD
+    '''
+
+    from numpy import where,mean
+    
+    #find gaps and not gaps
+    gaps=where(st[0].data==drop_value)[0]
+    not_gaps=where(st[0].data!=drop_value)[0]
+    
+    #Find mean without taking gaps into account and remove it
+    bias=mean(st[0].data[not_gaps])
+    st[0].data=st[0].data-bias
+    
+    #zero out gaps
+    st[0].data[gaps]=0
+    
+    return st
+
+
+
+def ppsd(st,ppsd):
     '''
     Get ppsd for one day file
     '''

@@ -1,9 +1,9 @@
 #!/bin/bash
 
-#This script should run at 1:30am of the day AFTER the day of interest whose data 
+#This script should run at 1:30am of the day AFTER the day of interest whose data
 #was collected from the RabbitMQ exchange by the subscription script. It will obtain
 #the necessary arguemnts and pass them into json2mseed.py, this python script will in
-#turn use obspy commands to conver the json for every station and every channel to 
+#turn use obspy commands to conver the json for every station and every channel to
 #one big daily MSEED file
 
 #Add to PYTHONPATH
