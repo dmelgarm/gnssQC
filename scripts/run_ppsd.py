@@ -65,14 +65,14 @@ ppsd_dir='/home/dmelgarm/RTGNSS/readi/analysis/spectra/'
 plot_dir='/home/dmelgarm/RTGNSS/plots/ppsd/'
 net='RK'
 exchange='READI'
-day_of_year=285
+day_of_year=288
 ###############################################################################
 
 
 
 ################        What do you want to do?    ############################
 
-run_ppsd=False
+run_ppsd=True
 plot_ppsd=True
 
 #################     done with pre-amble stuff    ############################

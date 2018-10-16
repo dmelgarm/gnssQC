@@ -50,7 +50,7 @@ print(t0)
 
 ###########     manual argument inputs for debugging     #######################
 #sitelist='/home/dmelgarm/code/PANGA/site_list/readi_sitelist.txt'
-#datapath='/home/dmelgarm/RTGNSS/cwu/mseed/2018/285/'
+#datapath='/home/dmelgarm/RTGNSS/cwu/mseed/2018/288/'
 #net='CW'
 #t0=UTCDateTime('2018-10-12T00:00:00.000000Z')
 ###############################################################################
@@ -206,13 +206,14 @@ for k in range(len(east_list)):
         north_list[k].trim(starttime=t0,endtime=t0+86400)
         up_list[k].trim(starttime=t0,endtime=t0+86400)
         
-        #write to file
-        file_out=datapath+east_list[k][0].stats.station+'.LXE.mseed'
-        east_list[k].write(file_out,format='MSEED')
-        file_out=datapath+north_list[k][0].stats.station+'.LXN.mseed'
-        north_list[k].write(file_out,format='MSEED')
-        file_out=datapath+up_list[k][0].stats.station+'.LXZ.mseed'
-        up_list[k].write(file_out,format='MSEED')
+        #write to file, oly if there was data left
+        if len(east_list[k])>0 and len(up_list[k])>0 and len(north_list[k])>0:
+            file_out=datapath+east_list[k][0].stats.station+'.LXE.mseed'
+            east_list[k].write(file_out,format='MSEED')
+            file_out=datapath+north_list[k][0].stats.station+'.LXN.mseed'
+            north_list[k].write(file_out,format='MSEED')
+            file_out=datapath+up_list[k][0].stats.station+'.LXZ.mseed'
+            up_list[k].write(file_out,format='MSEED')
     
 #delete big huge json file when you are done
 #remove(json_file)

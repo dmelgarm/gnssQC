@@ -54,12 +54,21 @@ print(days)
 ##############       done parsing       #######################################
 
 
+#################  hard codes for debugging     ###############################
+#site_list='/home/dmelgarm/code/PANGA/site_list/readi_sitelist.txt'
+#exchange='READI'
+#net='RK'
+#working_dir='/home/dmelgarm/RTGNSS/readi/mseed/2018/'
+#days=arange(284,289)
+###############################################################################
+
+
 
 ################        What do you want to do?    ############################
 
 find_dropouts=True
 plot_dropouts_table=True
-plot_histogram_time_of_day=True
+plot_histogram_time_of_day=False
 
 #################     done with pre-amble stuff    ############################
 
